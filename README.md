@@ -14,12 +14,17 @@ This repository hosts the **web application** built using **Laravel** and **Fila
 - Created `users` table with `role` column for role-based access control (admin / user)
 - Added an `AdminUserSeeder` for creating a default admin user
 - Basic project structure connected to a MySQL database
+- Configured custom authentication (login & register) using Laravel Breeze
+- Integrated Google OAuth with Laravel Socialite
+- Successfully linked OAuth authentication to Filament dashboards:
+  - Admin → Admin Filament Dashboard
+  - User → User Filament Dashboard
+- Implemented role-based redirects after both traditional and Google logins
 
 ### 🔧 In Progress
-- Building custom login and register pages (with Google OAuth planned)
-- Creating role-based dashboard redirects:
-  - Admin → Filament Admin Dashboard  
-  - User → User Dashboard
+- Adding Fire Detection data visualization on dashboards
+- Integrating real-time IoT + ML fire prediction modules
+- Implementing alert notifications (email/SMS)
 
 ---
 
@@ -28,10 +33,10 @@ This repository hosts the **web application** built using **Laravel** and **Fila
 | Layer | Technology |
 |-------|-------------|
 | Backend Framework | Laravel 11 |
-| Admin Dashboard | FilamentPHP v4 |
+| Admin/User Dashboards | FilamentPHP v4 |
 | Database | MySQL |
 | Frontend | Blade Templates |
-| Authentication | Laravel Auth (custom login/register + Google OAuth planned) |
+| Authentication | Laravel Breeze + Socialite (Google OAuth) |
 
 ---
 
@@ -56,6 +61,16 @@ Copy `.env.example` to `.env` and update your database credentials:
 ```bash
 cp .env.example .env
 php artisan key:generate
+```
+Update your .env with:
+Database credentials
+Google OAuth credentials:
+
+```bash
+GOOGLE_CLIENT_ID=your-client-id
+GOOGLE_CLIENT_SECRET=your-client-secret
+GOOGLE_REDIRECT_URI=http://localhost:8000/auth/google/callback
+
 ```
 
 ### 4️⃣ Run migrations and seeders
@@ -85,16 +100,57 @@ Password: password
 
 *(Change these in `database/seeders/AdminUserSeeder.php` if needed.)*
 
+
+---
+
+## 🔐 Authentication Overview
+
+FlameGuard supports two authentication methods:
+
+| Method               | Description                                             |
+| -------------------- | ------------------------------------------------------- |
+| **Email & Password** | Traditional login and registration via Laravel Breeze   |
+| **Google OAuth**     | Social login using Laravel Socialite for quicker access |
+
+After authentication, users are redirected automatically:
+
+* 🧑‍💼 **Admin:** `/admin` → Filament Admin Dashboard
+* 👤 **User:** `/user` → Filament User Dashboard
+
 ---
 
 ## 🧩 Next Steps
 
-* Implement Google OAuth using **Laravel Socialite**
-* Design custom login/register pages
-* Add Filament dashboards for Admin and User roles
-* Integrate IoT + ML modules for real-time fire detection alerts
+* ✅ Finalize Google OAuth error handling
+* 🎨 Improve dashboard UI with Filament components
+* ⚙️ Integrate IoT sensor data streams
+* 🤖 Train and deploy ML model for fire detection
+* 📱 Add notification system for real-time alerts
 
 ---
+
+## 🧠 Project Structure
+
+```
+flameguard/
+├── app/
+│   ├── Http/Controllers/
+│   │   ├── Auth/AuthenticatedSessionController.php
+│   │   ├── SocialAuthController.php
+│   ├── Models/User.php
+│   ├── Filament/
+│   │   ├── Admin/
+│   │   └── User/
+├── database/
+│   ├── migrations/
+│   ├── seeders/AdminUserSeeder.php
+├── resources/views/auth/
+├── routes/web.php
+└── .env
+```
+
+---
+
 
 ## 📜 License
 

@@ -43,5 +43,17 @@
                 {{ __('Log in') }}
             </x-primary-button>
         </div>
+
+        <a href="{{ url('auth/google') }}" 
+   class="w-full mt-3 inline-flex justify-center items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+   Login with Google
+</a>
+
+<a href="{{ url('auth/facebook') }}" 
+   class="w-full mt-2 inline-flex justify-center items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+   Login with Facebook
+</a>
+
+
     </form>
 </x-guest-layout>
