@@ -22,3 +22,5 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+/ML-API/*.pkl
+/ml-api/.env
