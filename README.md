@@ -15,16 +15,29 @@ FlameGuard System/
 └── 🗄️ MySQL Database (Data Storage)
 ```
 
+**Real-Time Data Flow:**
+```
+ESP32 Sensors → Laravel API → Flask ML API → Database → Web Dashboard
+```
+
 ---
 
 ## 🚀 Current Progress
 
-### ✅ Completed
+### ✅ Completed - MVP Fully Operational
+**End-to-End Integration Complete:**
+- ✅ ESP32 to Laravel API communication established
+- ✅ Laravel to Flask ML API integration working
+- ✅ Real-time sensor data storage in MySQL database
+- ✅ Fire detection predictions with confidence scoring
+- ✅ Complete data pipeline: ESP32 → Laravel → ML API → Database
+
 **Laravel Web Application:**
 - Laravel 11 project setup with FilamentPHP v4
 - Database configuration with role-based access control
 - Custom authentication (Laravel Breeze + Google OAuth)
 - Admin/User dashboards with role-based redirects
+- REST API endpoints for ESP32 sensor data reception
 
 **Machine Learning API:**
 - Flask API with trained Decision Tree model
@@ -33,10 +46,10 @@ FlameGuard System/
 - Sensor data processing and scaling
 
 **IoT Integration:**
-- ESP32 code for sensor data collection
-- MQ2 (Gas/Smoke), MQ7 (CO), DHT22 (Temp/Humidity) sensors
-- HTTP communication with ML API
+- ESP32 code for sensor data collection (MQ2, DHT22)
+- HTTP communication with Laravel backend
 - Visual/audible alerts (LEDs + Buzzer)
+- Real-time data transmission every 5 seconds
 
 ### 🔧 In Progress
 - Real-time data visualization on dashboards
@@ -63,18 +76,16 @@ FlameGuard System/
 ```
 flameguard-system/
 ├── 📱 laravel-app/                 # Web Dashboard
-│   ├── app/
-│   ├── bootstrap/
-│   ├── config/
-│   ├── database/
-│   ├── public/
-│   ├── resources/views/
+│   ├── app/Http/Controllers/Api/SensorDataController.php
+│   ├── app/Models/SensorData.php
+│   ├── database/migrations/
+│   ├── routes/api.php
 │   └── composer.json
 ├── 🤖 ml-api/                      # Machine Learning API
 │   ├── app.py                     # Flask API server
 │   ├── requirements.txt           # Python dependencies
-│   └── README.md                 # API documentation
-└── 📚 docs/                       # Documentation
+│   └── README.md                
+               
 ```
 
 ---
@@ -103,8 +114,8 @@ php artisan key:generate
 # Setup database
 php artisan migrate --seed
 
-# Serve application
-php artisan serve
+# Serve application (allow external connections)
+php artisan serve --host=0.0.0.0 --port=8000
 ```
 
 ### 2️⃣ Machine Learning API
@@ -115,36 +126,56 @@ cd ml-api
 # Install Python dependencies
 pip install -r requirements.txt
 
-# Download model files (if not included)
-
 # Run API server
-
-# - cd into ML API folder from terminal then run:
+# - cd into ML-API folder then run:
 python app.py
 ```
 
-**📝 Note:** The API will provide a ngrok URL like `https://abc123.ngrok-free.app` - use this in your ESP32 code and Laravel `.env` file.
+**📝 Note:** The API will provide a ngrok URL like `https://abc123.ngrok-free.app` - use this in your Laravel `.env` file as `ML_API_URL`.
 
 ### 3️⃣ ESP32 Setup
 
 1. **Hardware Connections:**
    - MQ2 Sensor → GPIO 34
-   - MQ7 Sensor → GPIO 23  
    - DHT22 → GPIO 15
    - Red LED → GPIO 18 (Alarm)
    - Green LED → GPIO 19 (Safe)
    - Buzzer → GPIO 21
 
 2. **Upload Code:**
-   - Open `esp32-code/flameguard_esp32.ino` in Arduino IDE
-   - Update WiFi credentials and ML API URL
+   - Open `esp32-code/FlameGuard_Laravel_Integration.ino` in Arduino IDE
+   - Update WiFi credentials and Laravel API URL
    - Upload to ESP32
 
 ---
 
 ## 🔌 API Endpoints
 
-### ML API (`https://your-ngrok-url.ngrok-free.app`)
+### Laravel API (`http://your-server:8000`)
+```http
+POST /api/sensor-data
+Content-Type: application/json
+
+{
+  "device_id": "esp32_flameguard_001",
+  "mq2": 450.5,
+  "temp": 25.3,
+  "humidity": 60.2
+}
+
+Response:
+{
+  "status": "success",
+  "message": "Sensor data processed successfully",
+  "data_id": 14,
+  "ml_insights": {
+    "fire_detected": false,
+    "confidence": 0.95
+  }
+}
+```
+
+### ML API (Flask) (`https://your-ngrok-url.ngrok-free.app`)
 ```http
 POST /predict
 Content-Type: application/json
@@ -152,22 +183,20 @@ Content-Type: application/json
 {
   "mq2": 450.5,
   "temp": 25.3,
-  "humidity": 60.2,
-  "device_id": "esp32_001"
+  "humidity": 60.2
 }
 
 Response:
 {
   "fire_detected": false,
   "confidence": 0.95,
-  "timestamp": 1760906213.2905915
+  "timestamp": 1760906213.2905915,
+  "sensor_data": {
+    "mq2": 450.5,
+    "temp": 25.3,
+    "humidity": 60.2
+  }
 }
-```
-
-### Web Dashboard API
-```http
-POST /api/fire/check          # Manual fire check
-GET  /fire-monitoring/dashboard  # Monitoring dashboard
 ```
 
 ---
@@ -222,7 +251,7 @@ When fire is detected:
 
 - **Algorithm**: Decision Tree Classifier
 - **Accuracy**: >95% on test data
-- **Features**: MQ2, MQ7, Temperature, Humidity
+- **Features**: MQ2, Temperature, Humidity
 - **Inference Time**: <100ms
 
 ---
@@ -240,11 +269,6 @@ Edit `processPrediction()` in ESP32 code and Laravel notification handlers.
 
 ---
 
-## 📝 License
-
-This project is licensed under the **MIT License**.
-
----
 
 
 > Developed with ❤️ by **Michelle Atuti** | IoT & Machine Learning Fire Detection System
