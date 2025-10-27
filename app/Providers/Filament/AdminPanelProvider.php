@@ -72,28 +72,30 @@ class AdminPanelProvider extends PanelProvider
                     ->sort(1)
                     ->group('🔥 Monitoring'),
                     
-                NavigationItem::make('Live Monitoring')
-                    ->icon('heroicon-o-eye')
-                    ->url('/admin')
-                    ->isActiveWhen(fn (): bool => request()->routeIs('filament.admin.pages.dashboard'))
-                    ->sort(2)
-                    ->group('🔥 Monitoring'),
+                // NavigationItem::make('Live Monitoring')
+                //     ->icon('heroicon-o-eye')
+                //     ->url('/admin')
+                //     ->isActiveWhen(fn (): bool => request()->routeIs('filament.admin.pages.dashboard'))
+                //     ->sort(2)
+                //     ->group('🔥 Monitoring'),
 
                 // 🚨 Fire & Alerts Group
                 NavigationItem::make('Active Alerts')
-                    ->icon('heroicon-o-bell-alert')
-                    ->url('#')
-                    ->badge(fn (): string => (string) SensorData::where('created_at', '>=', now()->subHour())
-                        ->whereJsonContains('ml_results->fire_detected', true)
-                        ->count())
-                    ->sort(10)
-                    ->group('🚨 Fire & Alerts'),
+                ->icon('heroicon-o-bell-alert')
+                ->url('/admin/active-alerts')
+                ->isActiveWhen(fn (): bool => request()->routeIs('filament.admin.pages.active-alerts'))
+                ->badge(fn (): string => (string) SensorData::where('created_at', '>=', now()->subHour())
+                    ->whereJsonContains('ml_results->fire_detected', true)
+                    ->count())
+                ->sort(10)
+                ->group('🚨 Fire & Alerts'),
 
                 NavigationItem::make('Alert History')
-                    ->icon('heroicon-o-clock')
-                    ->url('#')
-                    ->sort(11)
-                    ->group('🚨 Fire & Alerts'),
+                ->icon('heroicon-o-clock')
+                ->url(fn (): string => \App\Filament\Admin\Pages\AlertHistory::getUrl())
+                ->isActiveWhen(fn (): bool => request()->routeIs('filament.admin.pages.alert-history'))
+                ->sort(11)
+                ->group('🚨 Fire & Alerts'),
 
                 // 📡 Devices Group
                 NavigationItem::make('ESP32 Devices')

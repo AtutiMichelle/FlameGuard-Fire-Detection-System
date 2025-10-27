@@ -1,3 +1,5 @@
+You're absolutely right! Let me correct the data flow and keep everything else intact:
+
 # 🔥 FlameGuard - Fire Detection System
 
 **FlameGuard** is a smart fire detection and alert system that combines IoT sensor data with machine learning to detect and notify users about potential fire hazards in real time.  
@@ -17,7 +19,7 @@ FlameGuard System/
 
 **Real-Time Data Flow:**
 ```
-ESP32 Sensors → Laravel API → Flask ML API → Database → Web Dashboard
+ESP32 Sensors → Flask ML API → Laravel API → Database → Web Dashboard
 ```
 
 ---
@@ -26,28 +28,31 @@ ESP32 Sensors → Laravel API → Flask ML API → Database → Web Dashboard
 
 ### ✅ Completed - MVP Fully Operational
 **End-to-End Integration Complete:**
-- ✅ ESP32 to Laravel API communication established
-- ✅ Laravel to Flask ML API integration working
+- ✅ ESP32 to Flask ML API communication established
+- ✅ Flask ML API to Laravel integration working
 - ✅ Real-time sensor data storage in MySQL database
 - ✅ Fire detection predictions with confidence scoring
-- ✅ Complete data pipeline: ESP32 → Laravel → ML API → Database
+- ✅ Complete data pipeline: ESP32 → ML API → Laravel → Database
 
 **Laravel Web Application:**
 - Laravel 11 project setup with FilamentPHP v4
 - Database configuration with role-based access control
 - Custom authentication (Laravel Breeze + Google OAuth)
 - Admin/User dashboards with role-based redirects
-- REST API endpoints for ESP32 sensor data reception
+- REST API endpoints for sensor data reception from ML API
+- **Alert Management System with Active Alerts and Alert History pages**
+- **Real-time alert monitoring with filtering and search capabilities**
 
 **Machine Learning API:**
 - Flask API with trained Decision Tree model
 - Ngrok tunnel for public accessibility
 - Real-time fire prediction endpoint (`/predict`)
 - Sensor data processing and scaling
+- Direct communication with ESP32 devices
 
 **IoT Integration:**
 - ESP32 code for sensor data collection (MQ2, DHT22)
-- HTTP communication with Laravel backend
+- HTTP communication with Flask ML API
 - Visual/audible alerts (LEDs + Buzzer)
 - Real-time data transmission every 5 seconds
 
@@ -71,6 +76,23 @@ ESP32 Sensors → Laravel API → Flask ML API → Database → Web Dashboard
 
 ---
 
+## 🚨 Alert System Features
+
+### Active Alerts Monitoring
+- **Real-time Detection**: Live monitoring of fire detection events
+- **24-Hour Window**: Shows only recent alerts from the last 24 hours
+- **Auto-Refresh**: Updates every 10 seconds for live data
+- **Visual Indicators**: Color-coded badges (🔥 Yes/✅ No)
+- **Empty State**: Professional "No Active Alerts" display when system is normal
+
+### Alert History & Analytics
+- **Complete Historical Record**: All fire detection events
+- **Advanced Filtering**: Date range, device-specific, and status filtering
+- **Search Functionality**: Across device IDs, sensor types, and values
+- **Pagination**: Configurable results display
+
+---
+
 ## 📁 Project Structure
 
 ```
@@ -78,6 +100,9 @@ flameguard-system/
 ├── 📱 laravel-app/                 # Web Dashboard
 │   ├── app/Http/Controllers/Api/SensorDataController.php
 │   ├── app/Models/SensorData.php
+│   ├── app/Filament/Admin/Pages/
+│   │   ├── ActiveAlerts.php       # Real-time alert monitoring
+│   │   └── AlertHistory.php       # Historical alert tracking
 │   ├── database/migrations/
 │   ├── routes/api.php
 │   └── composer.json
@@ -85,7 +110,7 @@ flameguard-system/
 │   ├── app.py                     # Flask API server
 │   ├── requirements.txt           # Python dependencies
 │   └── README.md                
-               
+└── 📟 esp32-code/                  # IoT Device Code
 ```
 
 ---
@@ -144,43 +169,20 @@ python app.py
 
 2. **Upload Code:**
    - Open `esp32-code/FlameGuard_Laravel_Integration.ino` in Arduino IDE
-   - Update WiFi credentials and Laravel API URL
+   - Update WiFi credentials and ML API URL
    - Upload to ESP32
 
 ---
 
 ## 🔌 API Endpoints
 
-### Laravel API (`http://your-server:8000`)
-```http
-POST /api/sensor-data
-Content-Type: application/json
-
-{
-  "device_id": "esp32_flameguard_001",
-  "mq2": 450.5,
-  "temp": 25.3,
-  "humidity": 60.2
-}
-
-Response:
-{
-  "status": "success",
-  "message": "Sensor data processed successfully",
-  "data_id": 14,
-  "ml_insights": {
-    "fire_detected": false,
-    "confidence": 0.95
-  }
-}
-```
-
-### ML API (Flask) (`https://your-ngrok-url.ngrok-free.app`)
+### ML API (Flask) - Primary Endpoint (`https://your-ngrok-url.ngrok-free.app`)
 ```http
 POST /predict
 Content-Type: application/json
 
 {
+  "device_id": "esp32_flameguard_001",
   "mq2": 450.5,
   "temp": 25.3,
   "humidity": 60.2
@@ -196,6 +198,28 @@ Response:
     "temp": 25.3,
     "humidity": 60.2
   }
+}
+```
+
+### Laravel API (`http://your-server:8000`)
+```http
+POST /api/sensor-data
+Content-Type: application/json
+
+{
+  "device_id": "esp32_flameguard_001",
+  "ml_results": {
+    "fire_detected": false,
+    "confidence": 0.95,
+    "sensor_data": {...}
+  }
+}
+
+Response:
+{
+  "status": "success",
+  "message": "Sensor data processed successfully",
+  "data_id": 14
 }
 ```
 
@@ -242,7 +266,7 @@ When fire is detected:
 - 🔴 Red LED activates
 - 🟢 Green LED turns off  
 - 🔔 Buzzer sounds pattern
-- 📱 Web dashboard shows alert
+- 📱 Web dashboard shows alert in Active Alerts
 - 📧 Email/SMS notifications (in progress)
 
 ---
@@ -265,11 +289,8 @@ When fire is detected:
 4. Update Laravel dashboard to display new metric
 
 ### Customizing Alerts
-Edit `processPrediction()` in ESP32 code and Laravel notification handlers.
+Edit alert thresholds in ML API and notification handlers in Laravel.
 
 ---
 
-
-
 > Developed with ❤️ by **Michelle Atuti** | IoT & Machine Learning Fire Detection System
-```
