@@ -1,5 +1,3 @@
-You're absolutely right! Let me correct the data flow and keep everything else intact:
-
 # 🔥 FlameGuard - Fire Detection System
 
 **FlameGuard** is a smart fire detection and alert system that combines IoT sensor data with machine learning to detect and notify users about potential fire hazards in real time.  
