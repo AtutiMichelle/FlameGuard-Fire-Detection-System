@@ -2,111 +2,166 @@
 
 namespace App\Filament\Admin\Widgets;
 
-use Filament\Widgets\ChartWidget;
-use App\Models\SensorData;
-use Illuminate\Support\Facades\DB;
+use Filament\Widgets\Widget;
+use Illuminate\Support\Facades\Http;
 
-class SensorTrendsChart extends ChartWidget
+class SensorTrendsChart extends Widget
 {
-    protected ?string $heading = 'Sensor Trends (Last 24 Hours)';
+    protected string $view = 'filament.admin.widgets.sensor-trends-chart';
+    protected ?string $heading = '🔥 Realtime Sensor Data';
+    protected int|string|array $columnSpan = 'full';
+    protected ?string $pollingInterval = '1s'; // poll every second
 
-    protected int | string | array $columnSpan = 'full'; // Takes full width
-    
-    // Remove these static properties - they're already defined in the parent class
-    // protected static ?string $pollingInterval = '30s';
-    // protected static ?string $maxHeight = '300px';
-
-    protected function getData(): array
+    public function getViewData(): array
     {
-        // Get data grouped by hour for the last 24 hours
-        $data = SensorData::where('created_at', '>=', now()->subDay())
-            ->select(
-                DB::raw('DATE_FORMAT(created_at, "%H:00") as hour'),
-                DB::raw('AVG(JSON_UNQUOTE(JSON_EXTRACT(raw_data, "$.temp"))) as avg_temp'),
-                DB::raw('AVG(JSON_UNQUOTE(JSON_EXTRACT(raw_data, "$.mq2"))) as avg_gas'),
-                DB::raw('AVG(JSON_UNQUOTE(JSON_EXTRACT(raw_data, "$.humidity"))) as avg_humidity')
-            )
-            ->groupBy('hour')
-            ->orderBy('hour')
-            ->get();
+        $firebaseUrl = rtrim(env('FIREBASE_DATABASE_URL'), '/') . '/sensor_data/esp32_01/history.json';
 
-        // If no data, return empty arrays
-        if ($data->isEmpty()) {
-            return [
-                'datasets' => [
-                    [
-                        'label' => 'Temperature (°C)',
-                        'data' => [],
-                        'borderColor' => '#ef4444',
-                    ],
-                    [
-                        'label' => 'Gas Level (PPM)',
-                        'data' => [],
-                        'borderColor' => '#f59e0b',
-                    ],
-                    [
-                        'label' => 'Humidity (%)',
-                        'data' => [],
-                        'borderColor' => '#3b82f6',
-                    ],
-                ],
-                'labels' => [],
-            ];
+        try {
+            $response = Http::get($firebaseUrl);
+            $history = $response->json() ?? [];
+        } catch (\Throwable $e) {
+            $history = [];
+        }
+
+        $labels = [];
+        $temps = [];
+        $gases = [];
+        $humidities = [];
+
+        foreach ($history as $entry) {
+            $timestamp = $entry['timestamp'] ?? now()->format('H:i:s');
+            $labels[] = date('H:i:s', strtotime($timestamp));
+            $temps[] = $entry['temp'] ?? null;
+            $gases[] = $entry['mq2'] ?? null;
+            $humidities[] = $entry['humidity'] ?? null;
+        }
+
+        if (count($labels) > 20) {
+            $labels = array_slice($labels, -20);
+            $temps = array_slice($temps, -20);
+            $gases = array_slice($gases, -20);
+            $humidities = array_slice($humidities, -20);
         }
 
         return [
-            'datasets' => [
-                [
-                    'label' => 'Temperature (°C)',
-                    'data' => $data->pluck('avg_temp')->map(fn($val) => floatval($val))->toArray(),
-                    'borderColor' => '#ef4444',
-                    'backgroundColor' => 'rgba(239, 68, 68, 0.1)',
-                    'tension' => 0.4,
-                ],
-                [
-                    'label' => 'Gas Level (PPM)',
-                    'data' => $data->pluck('avg_gas')->map(fn($val) => floatval($val))->toArray(),
-                    'borderColor' => '#f59e0b',
-                    'backgroundColor' => 'rgba(245, 158, 11, 0.1)',
-                    'tension' => 0.4,
-                ],
-                [
-                    'label' => 'Humidity (%)',
-                    'data' => $data->pluck('avg_humidity')->map(fn($val) => floatval($val))->toArray(),
-                    'borderColor' => '#3b82f6',
-                    'backgroundColor' => 'rgba(59, 130, 246, 0.1)',
-                    'tension' => 0.4,
-                ],
-            ],
-            'labels' => $data->pluck('hour')->toArray(),
+            'labels' => $labels,
+            'temps' => $temps,
+            'gases' => $gases,
+            'humidities' => $humidities,
         ];
     }
-
-    protected function getType(): string
-    {
-        return 'line';
-    }
-
-    protected function getOptions(): array
-    {
-        return [
-            'plugins' => [
-                'legend' => [
-                    'display' => true,
-                    'position' => 'top',
-                ],
-            ],
-            'scales' => [
-                'y' => [
-                    'beginAtZero' => false,
-                ],
-            ],
-        ];
-    }
-    
-    // Add polling interval as a method instead of property
-    // public static function getPollingInterval(): ?string
-    // {
-    //     return '30s';
-    // }
 }
+
+
+//     protected ?string $heading = 'Sensor Trends (Last 24 Hours)';
+
+//     protected int | string | array $columnSpan = 'full'; // Takes full width
+    
+//     // Polling interval (in seconds)
+//     public function getPollingInterval(): ?string
+// {
+//     return '15s';
+// }
+
+
+    
+//     protected function getFirebaseDatabase()
+//     {
+//         $factory = (new Factory)->withServiceAccount(storage_path('app/serviceAccountKey.json'));
+//         return $factory->createDatabase();
+//     }
+    
+//         protected function getData(): array
+// {
+//     $database = $this->getFirebaseDatabase();
+//     $ref = $database->getReference('sensor_data'); // root node
+//     $snapshot = $ref->getValue(); // fetch all devices
+
+//     $labels = [];
+//     $temps = [];
+//     $gases = [];
+//     $humidities = [];
+
+//     if ($snapshot) {
+//         // Loop through each device
+//         foreach ($snapshot as $deviceId => $deviceData) {
+//             if (isset($deviceData['latest'])) {
+//                 $latest = $deviceData['latest'];
+
+//                 // Format timestamp for the label
+//                 $labels[] = date('H:i', strtotime($latest['timestamp']));
+
+//                 $temps[] = floatval($latest['temp']);
+//                 $gases[] = floatval($latest['mq2']);
+//                 $humidities[] = floatval($latest['humidity']);
+//             }
+//         }
+//     }
+
+//     // Return empty arrays if no data
+//     if (empty($labels)) {
+//         return [
+//             'datasets' => [
+//                 ['label' => 'Temperature (°C)', 'data' => [], 'borderColor' => '#ef4444'],
+//                 ['label' => 'Gas Level (PPM)', 'data' => [], 'borderColor' => '#f59e0b'],
+//                 ['label' => 'Humidity (%)', 'data' => [], 'borderColor' => '#3b82f6'],
+//             ],
+//             'labels' => [],
+//         ];
+//     }
+
+//     return [
+//         'datasets' => [
+//             [
+//                 'label' => 'Temperature (°C)',
+//                 'data' => $temps,
+//                 'borderColor' => '#ef4444',
+//                 'backgroundColor' => 'rgba(239,68,68,0.1)',
+//                 'tension' => 0.4,
+//             ],
+//             [
+//                 'label' => 'Gas Level (PPM)',
+//                 'data' => $gases,
+//                 'borderColor' => '#f59e0b',
+//                 'backgroundColor' => 'rgba(245,158,11,0.1)',
+//                 'tension' => 0.4,
+//             ],
+//             [
+//                 'label' => 'Humidity (%)',
+//                 'data' => $humidities,
+//                 'borderColor' => '#3b82f6',
+//                 'backgroundColor' => 'rgba(59,130,246,0.1)',
+//                 'tension' => 0.4,
+//             ],
+//         ],
+//         'labels' => $labels,
+//     ];
+// }
+//     protected function getType(): string
+//     {
+//         return 'line';
+//     }
+
+//     protected function getOptions(): array
+//     {
+//         return [
+//             'plugins' => [
+//                 'legend' => [
+//                     'display' => true,
+//                     'position' => 'top',
+//                 ],
+//             ],
+//             'scales' => [
+//                 'y' => [
+//                     'beginAtZero' => false,
+//                 ],
+//             ],
+//         ];
+//     }
+    
+//     // Add polling interval as a method instead of property
+//     // public static function getPollingInterval(): ?string
+//     // {
+//     //     return '30s';
+//     // }
+//
