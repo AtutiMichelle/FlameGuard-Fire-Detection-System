@@ -14,16 +14,11 @@ class ActiveAlerts extends Page implements Tables\Contracts\HasTable
     use Tables\Concerns\InteractsWithTable;
 
     protected static string|UnitEnum|null $navigationGroup = '🚨 Fire & Alerts';
-    protected static ?string $title = 'Active Alerts'; // This is for the browser tab and navigation
+    protected static ?string $title = 'Active Alerts';
     protected static ?string $slug = 'active-alerts';
     // protected static ?string $navigationIcon = 'heroicon-o-bell-alert';
     protected string $view = 'filament.admin.pages.active-alerts';
 
-    // Add this to hide the default page title
-    protected static bool $shouldRegisterNavigation = true;
-    protected static ?string $navigationLabel = 'Active Alerts';
-
-    // This removes the default page title from the content area
     public function getHeading(): string
     {
         return '';
@@ -50,15 +45,12 @@ class ActiveAlerts extends Page implements Tables\Contracts\HasTable
                     ->formatStateUsing(fn ($state): string => $state ? '🔥 Yes' : '✅ No'),
                 Tables\Columns\TextColumn::make('raw_data.temp')
                     ->label('Temperature (°C)')
-                    ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('raw_data.mq2')
                     ->label('Gas Level (MQ2)')
-                    ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('raw_data.humidity')
                     ->label('Humidity (%)')
-                    ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
                     ->label('Status')
@@ -71,7 +63,6 @@ class ActiveAlerts extends Page implements Tables\Contracts\HasTable
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Timestamp')
                     ->dateTime('Y-m-d H:i:s')
-                    ->searchable()
                     ->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
@@ -79,6 +70,9 @@ class ActiveAlerts extends Page implements Tables\Contracts\HasTable
                 Tables\Filters\TernaryFilter::make('ml_results.fire_detected')
                     ->label('Fire Detected'),
             ])
+            ->emptyStateHeading('No Active Alerts')
+            ->emptyStateDescription('All systems normal - no fire detected in the last 24 hours')
+            ->emptyStateIcon('heroicon-o-check-badge')
             ->paginated(false)
             ->poll('10s');
     }
@@ -86,8 +80,8 @@ class ActiveAlerts extends Page implements Tables\Contracts\HasTable
     protected function getQuery(): Builder
     {
         return SensorData::query()
-        ->whereJsonContains('ml_results->fire_detected', true)
-        ->where('created_at', '>=', now()->subHours(24)) // Only last 24 hours
-        ->latest();
+            ->whereJsonContains('ml_results->fire_detected', true)
+            ->where('created_at', '>=', now()->subHours(24))
+            ->latest();
     }
 }

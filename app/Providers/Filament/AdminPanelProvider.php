@@ -21,6 +21,13 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use App\Filament\Admin\Resources\Users\UserResource;
+use App\Filament\Admin\Widgets\SensorTrendsChart;
+use App\Filament\Admin\Widgets\GasChartWidget;
+use App\Filament\Admin\Widgets\TemperatureChartWidget;
+use App\Filament\Admin\Widgets\HumidityChartWidget;
+use App\Filament\Admin\Widgets\SensorStatsOverview;
+use App\Filament\Admin\Widgets\SensorChart;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -41,8 +48,13 @@ class AdminPanelProvider extends PanelProvider
                 Dashboard::class,
             ])
             ->widgets([
-                AccountWidget::class,
+                // AccountWidget::class,
                 // FilamentInfoWidget::class,
+                SensorStatsOverview::class,
+                
+                TemperatureChartWidget::class,
+                GasChartWidget::class,
+                HumidityChartWidget::class,
             ])
             ->navigationGroups([
                 NavigationGroup::make('🔥 Monitoring')
@@ -67,7 +79,7 @@ class AdminPanelProvider extends PanelProvider
                 // 🔥 Monitoring Group
                 NavigationItem::make('Dashboard')
                     ->icon('heroicon-o-home')
-                    ->url(fn (): string => Dashboard::getUrl())
+                    ->url(fn (): string => Dashboard::getUrl())            
                     ->isActiveWhen(fn (): bool => request()->routeIs('filament.admin.pages.dashboard'))
                     ->sort(1)
                     ->group('🔥 Monitoring'),
@@ -92,7 +104,7 @@ class AdminPanelProvider extends PanelProvider
 
                 NavigationItem::make('Alert History')
                 ->icon('heroicon-o-clock')
-                ->url(fn (): string => \App\Filament\Admin\Pages\AlertHistory::getUrl())
+                ->url('/admin/alert-history')
                 ->isActiveWhen(fn (): bool => request()->routeIs('filament.admin.pages.alert-history'))
                 ->sort(11)
                 ->group('🚨 Fire & Alerts'),
@@ -141,7 +153,8 @@ class AdminPanelProvider extends PanelProvider
                 // 👥 Administration Group
                 NavigationItem::make('User Management')
                     ->icon('heroicon-o-users')
-                    ->url('#')
+                    // ->url(fn (): string => \App\Filament\Admin\Resources\Users\UserResource::getUrl())
+                    ->url ('#')
                     ->badge(fn (): string => (string) User::count())
                     ->sort(50)
                     ->group('👥 Administration'),

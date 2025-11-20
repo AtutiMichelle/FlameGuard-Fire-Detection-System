@@ -8,7 +8,8 @@ use App\Models\SensorData;
 
 class SensorStatsOverview extends StatsOverviewWidget
 {
-      
+    protected static ?int $sort = 1; // first
+    // protected string $view = 'filament.admin.widgets.sensor-stats-overview';
     // protected static ?string $pollingInterval = '10s';
     
     protected function getStats(): array

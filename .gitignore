@@ -24,3 +24,6 @@ Homestead.yaml
 Thumbs.db
 /ML-API/*.pkl
 /ml-api/.env
+/ML-API/*h5
+/ML-API/bash.exe.stackdump
+/ML-API/serviceAccountKey.json
