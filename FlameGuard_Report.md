@@ -3,7 +3,6 @@
 **Final Year Project Report**  
 **Date:** November 23, 2025  
 **Models:** Tiny TensorFlow Lite ML Model deployed on ESP32
-
 ---
 
 ## 1. Executive Summary
