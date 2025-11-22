@@ -73,7 +73,7 @@ class ActiveAlerts extends Page implements Tables\Contracts\HasTable
             ->emptyStateHeading('No Active Alerts')
             ->emptyStateDescription('All systems normal - no fire detected in the last 24 hours')
             ->emptyStateIcon('heroicon-o-check-badge')
-            ->paginated(false)
+            ->paginated([10,25,50,100])
             ->poll('10s');
     }
 

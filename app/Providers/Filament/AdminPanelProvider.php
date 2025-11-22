@@ -50,8 +50,7 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 // AccountWidget::class,
                 // FilamentInfoWidget::class,
-                SensorStatsOverview::class,
-                
+                SensorStatsOverview::class,                
                 TemperatureChartWidget::class,
                 GasChartWidget::class,
                 HumidityChartWidget::class,
@@ -124,18 +123,19 @@ class AdminPanelProvider extends PanelProvider
                     ->group('📡 Devices'),
 
                 // 📊 Data & Reports Group
-                NavigationItem::make('Sensor Data')
-                    ->icon('heroicon-o-table-cells')
-                    ->url('#')
-                    ->badge(fn (): string => (string) SensorData::count())
-                    ->sort(30)
-                    ->group('📊 Data & Reports'),
+               NavigationItem::make('Sensor Data')
+                ->icon('heroicon-o-table-cells')
+                ->url(fn(): string => \App\Filament\Admin\Pages\SensorDataPage::getUrl())
+                ->badge(fn(): string => (string) SensorData::count())
+                ->sort(30)
+                ->group('📊 Data & Reports'),
 
-                NavigationItem::make('Analytics')
-                    ->icon('heroicon-o-chart-pie')
-                    ->url('#')
-                    ->sort(31)
-                    ->group('📊 Data & Reports'),
+            NavigationItem::make('Analytics')
+                ->icon('heroicon-o-chart-pie')
+                ->url(fn (): string => \App\Filament\Admin\Pages\AnalyticsPage::getUrl())
+                ->sort(31)
+                ->group('📊 Data & Reports'),
+
 
                 // ⚙️ System Group
                 NavigationItem::make('ML Settings')

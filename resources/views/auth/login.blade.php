@@ -1,7 +1,9 @@
 <x-guest-layout>
+
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
+   
     <form method="POST" action="{{ route('login') }}">
         @csrf
 
@@ -39,20 +41,27 @@
                 </a>
             @endif
 
-            <x-primary-button class="ms-3">
+           <x-primary-button class="ms-3" style="background-color: #ff4d00; color: #ffffff;">
                 {{ __('Log in') }}
             </x-primary-button>
         </div>
 
-        <a href="{{ url('auth/google') }}" 
-   class="w-full mt-3 inline-flex justify-center items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
-   Login with Google
-</a>
+            <p class="text-lg font-semibold text-center text-[#e60e0e] mt-4">
+            Or log in with:
+        </p>
 
-<a href="{{ url('auth/facebook') }}" 
-   class="w-full mt-2 inline-flex justify-center items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-   Login with Facebook
-</a>
+
+
+        <div class="flex justify-center gap-6 mt-4">
+            <a href="{{ url('auth/google') }}" class="p-4 rounded-full shadow hover:shadow-lg bg-[#fff4f4] flex items-center justify-center">
+                <img src="{{ asset('assets/icons/google.svg') }}" alt="Google" class="h-8 w-8">
+            </a>
+
+            <a href="{{ url('auth/facebook') }}" class="p-4 rounded-full shadow hover:shadow-lg bg-[#fff4f4] flex items-center justify-center">
+                <img src="{{ asset('assets/icons/facebook.svg') }}" alt="Facebook" class="h-8 w-8">
+            </a>
+        </div>
+
 
 
     </form>

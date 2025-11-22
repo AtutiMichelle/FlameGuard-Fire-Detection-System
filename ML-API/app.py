@@ -40,7 +40,7 @@ firebase_admin.initialize_app(cred, {
 # LARAVEL_API_URL = os.getenv('LARAVEL_API_URL', 'http://192.168.1.247:8000/api/sensor-data')  # Use actual LAN IP
 
 #Bnb WiFi IP
-LARAVEL_API_URL = os.getenv('LARAVEL_API_URL', 'http://192.168.0.16:8000/api/sensor-data')  # Use actual LAN IP
+LARAVEL_API_URL = os.getenv('LARAVEL_API_URL', 'http://192.168.0.14:8000/api/sensor-data')  # Use actual LAN IP
 
 
 # -----------------------
